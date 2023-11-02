@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#btnRecord').onclick = async () => {
     recognition.lang = document.querySelector('input:checked').getAttribute('data-recog-lang')
     recognition.start();
+    document.querySelector('#btnRecord').classList.add('rec');
     console.log('Ready to receive speech.');
 
     // TESTING
@@ -51,6 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   recognition.onspeechend = () => {
+    document.querySelector('#btnRecord').classList.remove('rec');
     recognition.stop();
   };
 
