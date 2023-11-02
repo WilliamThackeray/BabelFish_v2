@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#btnRecord').onclick = async () => {
     recognition.lang = document.querySelector('input:checked').getAttribute('data-recog-lang')
     recognition.start();
+    //start button animation
     document.querySelector('#btnRecord').classList.add('rec');
     console.log('Ready to receive speech.');
 
@@ -52,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   recognition.onspeechend = () => {
+    //stop button animation
     document.querySelector('#btnRecord').classList.remove('rec');
     recognition.stop();
   };
@@ -116,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function addText(leftText, rightText) {
-    //side should be 'l' for left and 'r' for right
+    //inputs text into DOM on left and right
     let pl = document.createElement('p')
     let pr = document.createElement('p')
     let div = document.createElement('div')
