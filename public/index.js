@@ -70,10 +70,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function speakWords(words, lang) {
     // this function speaks the input words back to the user
+    // I set the name we want because the language wasn't working 
+    let name
+    if (lang === 'es') {
+      name = 'Google español'
+    }
+    else {
+      name = 'Microsoft Mark - English (United States)'
+    }
     let voice;
-    for (let l of synth.getVoices()) {
-      if (l['lang'] == lang) {
-        voice = l //set voice
+    for (let v of synth.getVoices()) {
+      if (v['name'] == name) {
+        voice = v //set voice
         break
       }
     }
