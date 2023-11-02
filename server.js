@@ -15,28 +15,22 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(cors())
-// const server = createServer(app);
-// const io = new Server(server);
 
 app.use(express.static('public'))
 
 
 app.get('/', (req, res) => {
   res.sendFile(join(__dirname, './index.html'));
-  // res.sendFile(join(__dirname, './index.js'));
 });
 
 app.post('/v1/translate', (req, res) => {
-  console.log('req.body:\n', req.body)
-  
   translator
   .translateText(`${req.body.text}`, null, req.body.target_lang)
   .then((result) => {
-    console.log(result.text); 
     res.send(result.text)
   })
   .catch((error) => {
-    console.error(error);
+    console.log(error)
     res.status(500)
     res.send()
   });

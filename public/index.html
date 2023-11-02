@@ -10,27 +10,25 @@
   src="https://cdn.jsdelivr.net/npm/translate@2/index.min.js"
   ></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
+  <!-- favicon and css -->
+  <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <h1>BabelFish Translation</h1>
   <div>
-    <button id="record">Record</button>
+    <button id="btnRecord">Record</button>
     <ul>
-      <label><input type="radio" name="direction" data-lang="es" checked>English to Spanish</label>
-      <label><input type="radio" name="direction" data-lang="en">Spanish to English</label>
+      <label><input type="radio" name="direction" data-trans-lang="es" data-recog-lang="en-US" checked>English to Spanish</label>
+      <label><input type="radio" name="direction" data-trans-lang="en-US" data-recog-lang="es">Spanish to English</label>
     </ul>
   </div>
-  <h3>Speech Output</h3>
-  <div class="input">
-
+  <div id="text">
+    <div class="space-between">
+      <p><h3>Speech</h3></p>
+      <p><h3>Translation</h3></p>
+    </div>
   </div>
-  <h3>Translation</h3>
-  <div class="translation">
-
-  </div>
-  <br>
-  <br>
 
   <script type="module" src="./index.js"></script>
 </body>

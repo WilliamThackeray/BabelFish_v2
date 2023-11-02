@@ -1,0 +1,39 @@
+body{
+  margin: 50px 10%;
+}
+
+p {
+  max-width: 45%;
+}
+
+#text {
+  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+  color: lightslategray;
+}
+
+#btnDiv {
+  display: flex;
+  justify-content: center;
+}
+
+#btnRecord {
+  /* position: fixed; */
+  padding: 7px 20px;
+  background-color: rgb(177, 15, 15);
+  color: white;
+  border: none;
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+#btnRecord:active { /* change color when touched */
+  background-color: rgb(130, 20, 20);
+  cursor: pointer;
+}
+
+.space-between {
+  display: flex;
+  justify-content:space-between;
+}
