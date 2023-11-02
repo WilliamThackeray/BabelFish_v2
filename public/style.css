@@ -1,9 +1,19 @@
 body{
   margin: 50px 10%;
+  font-family: 'Roboto Mono', monospace;
 }
 
 p {
   max-width: 45%;
+}
+
+ul {
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  margin: 0;
 }
 
 #text {
