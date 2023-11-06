@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // insert speech and translation into DOM
     // addText(speech, tSpeech)
     // TODO: emit to socket here with both translations
-    await socket.emit('translation', ([speech, tSpeech], addText))
+    await socket.emit('translation', ([speech, tSpeech], printText))
 
 
     // call a speak function
@@ -108,7 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
       headers: {
         'Content-type': 'application/json;'
       },
-      
     });
 
     let newWords = res.data
@@ -132,7 +131,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 })
 
-
+function printText(t1, t2) {
+  console.log(t1, t2)
+}
 
 socket.on('translation', (msg, cb) => {
   cb(msg[0], msg[1])
