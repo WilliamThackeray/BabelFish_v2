@@ -1,7 +1,7 @@
 const express = require('express');
 const { createServer } = require('node:http');
 const { join } = require('node:path');
-// const { Server } = require('socket.io');
+const { Server } = require('socket.io');
 const cors = require('cors')
 const deepl = require('deepl-node');
 const bodyParser = require('body-parser')
@@ -15,8 +15,10 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(cors())
-
 app.use(express.static('public'))
+
+const server = createServer(app);
+const io = new Server(server);
 
 
 app.get('/', (req, res) => {
@@ -37,22 +39,23 @@ app.post('/v1/translate', (req, res) => {
   
 })
 
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+  socket.on('translation', (msg, cb) => {
+    console.log('message: ' + msg);
+    console.log('callback: ' + cb);
+    
+    io.emit('translation', msg);
+  });
+});
 
-// io.on('connection', (socket) => {
-//   console.log('a user connected');
-//   socket.on('disconnect', () => {
-//     console.log('user disconnected');
-//   });
-//   socket.on('chat message', (msg) => {
-//     console.log('message: ' + msg);
-//     io.emit('chat message', msg);
-//   });
-// });
 
-
-// server.listen(3000, () => {
-//   console.log('server running at http://localhost:3000');
-// });
-app.listen(3000, () => {
+server.listen(3000, () => {
   console.log('server running at http://localhost:3000');
 });
+// app.listen(3000, () => {
+//   console.log('server running at http://localhost:3000');
+// });

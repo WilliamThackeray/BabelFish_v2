@@ -1,14 +1,9 @@
+const socket = io();
+
 document.addEventListener('DOMContentLoaded', function() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
   const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
-
-  // var colors = [ 'aqua' , 'azure' , 'beige', 'bisque', 'black', 'blue', 'brown', 'chocolate', 'coral', 'crimson', 'cyan', 'fuchsia', 'ghostwhite', 'gold', 'goldenrod', 'gray', 'green', 'indigo', 'ivory', 'khaki', 'lavender', 'lime', 'linen', 'magenta', 'maroon', 'moccasin', 'navy', 'olive', 'orange', 'orchid', 'peru', 'pink', 'plum', 'purple', 'red', 'salmon', 'sienna', 'silver', 'snow', 'tan', 'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'white', 'yellow'];
-
-  // const grammar = `#JSGF V1.0; grammar colors; public <color> = ${colors.join(
-  //   ' | ',
-  // )};`;
-
 
 
   const recognition = new SpeechRecognition();
@@ -38,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const speech = event.results[0][0].transcript;
     console.log(`Confidence: ${event.results[0][0].confidence}`);
 
-    // TODO: auto detect language if possible
+    // get language to translate too from radio input
     let lang = document.querySelector('input:checked').getAttribute('data-trans-lang')
     console.log('lang selected: ', lang)
 
@@ -46,7 +41,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let tSpeech = await translateSpeech(speech, lang)
 
     // insert speech and translation into DOM
-    addText(speech, tSpeech)
+    // addText(speech, tSpeech)
+    // TODO: emit to socket here with both translations
+    await socket.emit('translation', ([speech, tSpeech], addText))
+
 
     // call a speak function
     speakWords(tSpeech, lang)
@@ -114,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     let newWords = res.data
+
     return newWords
   }
 
@@ -131,4 +130,11 @@ document.addEventListener('DOMContentLoaded', function() {
     div.appendChild(pr)
     document.querySelector('#text').appendChild(div).scrollIntoView({behavior: 'smooth'})
   }
+})
+
+
+
+socket.on('translation', (msg, cb) => {
+  cb(msg[0], msg[1])
+
 })
