@@ -44,9 +44,8 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
-  socket.on('translation', (msg, cb) => {
+  socket.on('translation', (msg) => {
     console.log('message: ' + msg);
-    console.log('callback: ' + cb);
     
     io.emit('translation', msg);
   });

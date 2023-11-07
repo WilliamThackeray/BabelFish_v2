@@ -41,9 +41,21 @@ document.addEventListener('DOMContentLoaded', function() {
     let tSpeech = await translateSpeech(speech, lang)
 
     // insert speech and translation into DOM
-    // addText(speech, tSpeech)
-    // TODO: emit to socket here with both translations
-    await socket.emit('translation', ([speech, tSpeech], printText))
+    // to both sockets
+    let binSpeech = [
+      speech.dataUsingEncoding(NSUTF8StringEncoding, {allowLossyConversion: false}), 
+      tSpeech.dataUsingEncoding(NSUTF8StringEncoding, {allowLossyConversion: false})
+    ]
+    // TODO: FOR SENDING BINARY DATA
+    //  websockets says we can send an ArrayBuffer()
+    //  should we convert the speech to binary (like above)
+    //  then get the '.byteLength' of each one, 
+    //  then initialize an ArrayBuffer() with the respective lengths
+    //  then send them over the sockets?
+    //      Or do we misunderstand?
+
+    await socket.emit('translation', binSpeech)
+    // await socket.emit('translation', [speech, tSpeech])
 
 
     // call a speak function
@@ -115,27 +127,27 @@ document.addEventListener('DOMContentLoaded', function() {
     return newWords
   }
 
-  function addText(leftText, rightText) {
-    //inputs text into DOM on left and right
-    let pl = document.createElement('p')
-    let pr = document.createElement('p')
-    let div = document.createElement('div')
-    let innerTxtLeft = document.createTextNode(leftText)
-    let innerTxtRight = document.createTextNode(rightText)
-    div.setAttribute('class', 'space-between')
-    pl.appendChild(innerTxtLeft)
-    pr.appendChild(innerTxtRight)
-    div.appendChild(pl)
-    div.appendChild(pr)
-    document.querySelector('#text').appendChild(div).scrollIntoView({behavior: 'smooth'})
-  }
 })
+function addText(leftText, rightText) {
+  //inputs text into DOM on left and right
+  let pl = document.createElement('p')
+  let pr = document.createElement('p')
+  let div = document.createElement('div')
+  let innerTxtLeft = document.createTextNode(leftText)
+  let innerTxtRight = document.createTextNode(rightText)
+  div.setAttribute('class', 'space-between')
+  pl.appendChild(innerTxtLeft)
+  pr.appendChild(innerTxtRight)
+  div.appendChild(pl)
+  div.appendChild(pr)
+  document.querySelector('#text').appendChild(div).scrollIntoView({behavior: 'smooth'})
+}
 
 function printText(t1, t2) {
   console.log(t1, t2)
 }
 
-socket.on('translation', (msg, cb) => {
-  cb(msg[0], msg[1])
-
+socket.on('translation', (msg) => {
+  printText(msg[0], msg[1])
+  addText(msg[0], msg[1])
 })
