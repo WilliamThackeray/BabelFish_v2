@@ -42,10 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // insert speech and translation into DOM
     // to both sockets
-    let binSpeech = [
-      speech.dataUsingEncoding(NSUTF8StringEncoding, {allowLossyConversion: false}), 
-      tSpeech.dataUsingEncoding(NSUTF8StringEncoding, {allowLossyConversion: false})
-    ]
+    // let binSpeech = [
+    //   speech.dataUsingEncoding(NSUTF8StringEncoding, {allowLossyConversion: false}), 
+    //   tSpeech.dataUsingEncoding(NSUTF8StringEncoding, {allowLossyConversion: false})
+    // ]
     // TODO: FOR SENDING BINARY DATA
     //  websockets says we can send an ArrayBuffer()
     //  should we convert the speech to binary (like above)
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //  then send them over the sockets?
     //      Or do we misunderstand?
 
-    await socket.emit('translation', binSpeech)
+    await socket.emit('translation', [speech, tSpeech])
     // await socket.emit('translation', [speech, tSpeech])
 
 
