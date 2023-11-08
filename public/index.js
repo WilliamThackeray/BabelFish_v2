@@ -1,5 +1,14 @@
 const socket = io();
 
+
+
+
+// const sleep = m => new Promise(r => setTimeout(r, m));
+// await sleep(3000);
+
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
@@ -14,13 +23,23 @@ document.addEventListener('DOMContentLoaded', function() {
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
 
-
+  let recorder;
+  let blob;
+  
   document.querySelector('#btnRecord').onclick = async () => {
+    
     recognition.lang = document.querySelector('input:checked').getAttribute('data-recog-lang')
     recognition.start();
     //start button animation
     document.querySelector('#btnRecord').classList.add('rec');
     console.log('Ready to receive speech.');
+    
+    let stream = await navigator.mediaDevices.getUserMedia({video: false, audio: true});
+    recorder = new RecordRTCPromisesHandler(stream, {
+      type: 'audio'
+    });
+    recorder.startRecording();
+
 
     // TESTING
     // call a translate function
@@ -54,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //  then send them over the sockets?
     //      Or do we misunderstand?
 
-    await socket.emit('translation', [speech, tSpeech])
+    await socket.emit('translation', ([speech, tSpeech], blob))
     // await socket.emit('translation', [speech, tSpeech])
 
 
@@ -62,10 +81,14 @@ document.addEventListener('DOMContentLoaded', function() {
     speakWords(tSpeech, lang)
   };
 
-  recognition.onspeechend = () => {
+  recognition.onspeechend = async () => {
     //stop button animation
     document.querySelector('#btnRecord').classList.remove('rec');
     recognition.stop();
+    
+    await recorder.stopRecording();
+    blob = await recorder.getBlob();
+    // invokeSaveAsDialog(blob);
   };
 
   recognition.onnomatch = function(event) {
@@ -147,7 +170,12 @@ function printText(t1, t2) {
   console.log(t1, t2)
 }
 
-socket.on('translation', (msg) => {
+socket.on('translation', (msg, blob) => {
   printText(msg[0], msg[1])
   addText(msg[0], msg[1])
+  // TODO: play voice blob
+  console.log(blob, '\nblob');
+  invokeSaveAsDialog(blob);
+  
 })
+

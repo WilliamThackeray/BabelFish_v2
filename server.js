@@ -44,10 +44,10 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
-  socket.on('translation', (msg) => {
+  socket.on('translation', (msg, blob) => {
     console.log('message: ' + msg);
     
-    io.emit('translation', msg);
+    io.emit('translation', (msg, blob));
   });
 });
 
