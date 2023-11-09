@@ -1,14 +1,6 @@
 const socket = io();
 
 
-
-
-// const sleep = m => new Promise(r => setTimeout(r, m));
-// await sleep(3000);
-
-
-
-
 document.addEventListener('DOMContentLoaded', function() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
@@ -24,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
   recognition.maxAlternatives = 1;
 
   let recorder;
-  let blob;
   
   document.querySelector('#btnRecord').onclick = async () => {
     
@@ -39,13 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
       type: 'audio'
     });
     recorder.startRecording();
-
-
-    // TESTING
-    // call a translate function
-    // let tSpeech = await translateSpeech('hello', 'es')
-    // document.querySelector('.translation').innerHTML = `<p>${tSpeech}</p>`
-    
   };
 
   recognition.onresult = async (event) => {
@@ -59,26 +43,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // call a translate function
     let tSpeech = await translateSpeech(speech, lang)
 
-    // insert speech and translation into DOM
-    // to both sockets
-    // let binSpeech = [
-    //   speech.dataUsingEncoding(NSUTF8StringEncoding, {allowLossyConversion: false}), 
-    //   tSpeech.dataUsingEncoding(NSUTF8StringEncoding, {allowLossyConversion: false})
-    // ]
-    // TODO: FOR SENDING BINARY DATA
-    //  websockets says we can send an ArrayBuffer()
-    //  should we convert the speech to binary (like above)
-    //  then get the '.byteLength' of each one, 
-    //  then initialize an ArrayBuffer() with the respective lengths
-    //  then send them over the sockets?
-    //      Or do we misunderstand?
-
-    await socket.emit('translation', ([speech, tSpeech], blob))
-    // await socket.emit('translation', [speech, tSpeech])
-
-
-    // call a speak function
-    speakWords(tSpeech, lang)
+    // emit translation event to server
+    let blob = await recorder.getBlob();
+    socket.emit('voice', blob, {
+      speech:[speech, tSpeech],
+      lang: lang,
+    })
+    // reset recorder's state
+    await recorder.reset();
+    // clear the memory
+    await recorder.destroy();
+    // so that we can record again
+    recorder = null;
   };
 
   recognition.onspeechend = async () => {
@@ -87,8 +63,6 @@ document.addEventListener('DOMContentLoaded', function() {
     recognition.stop();
     
     await recorder.stopRecording();
-    blob = await recorder.getBlob();
-    // invokeSaveAsDialog(blob);
   };
 
   recognition.onnomatch = function(event) {
@@ -100,37 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
 
-  // functions
-  
-  // SPEECH SYNTHESIS STUFF
-  const synth = window.speechSynthesis;
-
-  function speakWords(words, lang) {
-    // this function speaks the input words back to the user
-    // I set the name we want because the language wasn't working 
-    let name
-    if (lang === 'es') {
-      name = 'Google español'
-    }
-    else {
-      name = 'Microsoft Mark - English (United States)'
-    }
-    let voice;
-    for (let v of synth.getVoices()) {
-      if (v['name'] == name) {
-        voice = v //set voice
-        break
-      }
-    }
-    
-    const utterThis = new SpeechSynthesisUtterance(words);
-    // defaults
-    utterThis.voice = voice
-    utterThis.pitch = 1
-    utterThis.rate = 1
-
-    synth.speak(utterThis)
-  }
+  // FUNCTIONS
 
   async function translateSpeech(words, lang) {
     // this function translates the 'words' to the 'lang'
@@ -145,12 +89,11 @@ document.addEventListener('DOMContentLoaded', function() {
       },
     });
 
-    let newWords = res.data
-
-    return newWords
+    return res.data
   }
 
 })
+
 function addText(leftText, rightText) {
   //inputs text into DOM on left and right
   let pl = document.createElement('p')
@@ -166,16 +109,51 @@ function addText(leftText, rightText) {
   document.querySelector('#text').appendChild(div).scrollIntoView({behavior: 'smooth'})
 }
 
-function printText(t1, t2) {
-  console.log(t1, t2)
-}
 
-socket.on('translation', (msg, blob) => {
-  printText(msg[0], msg[1])
-  addText(msg[0], msg[1])
-  // TODO: play voice blob
-  console.log(blob, '\nblob');
-  invokeSaveAsDialog(blob);
+//SOCKET STUFF
+
+// catch voice event from server
+socket.on('voice', (arrayBuffer, textObj) => {
+  let blob = new Blob([arrayBuffer], { 'type' : 'audio/ogg; codecs=opus' });
+  let audio = document.createElement('audio');
+  audio.src = window.URL.createObjectURL(blob);
+  audio.addEventListener('ended', () => {
+    audio.currentTime = 0;
+    //call speak words
+    addText(textObj.speech[0], textObj.speech[1])
   
-})
+    const synth = window.speechSynthesis;
 
+    // call a speak function
+    speakWords(textObj.speech[1], textObj.lang)
+
+    function speakWords(words, lang) {
+      // this function speaks the input words back to the user
+      // I set the name we want because the language wasn't working 
+      let name
+      // console.log(lang)
+      if (lang === 'es') {
+        name = 'Google español'
+      }
+      else {
+        name = 'Microsoft Mark - English (United States)'
+      }
+      let voice;
+      for (let v of synth.getVoices()) {
+        if (v['name'].includes(name)) {
+          voice = v //set voice
+          break
+        }
+      }
+      
+      const utterThis = new SpeechSynthesisUtterance(words);
+      // defaults
+      utterThis.voice = voice
+      utterThis.pitch = 1
+      utterThis.rate = 1
+
+      synth.speak(utterThis)
+    }
+  })
+  audio.play();
+})

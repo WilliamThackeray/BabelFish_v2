@@ -44,10 +44,10 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
-  socket.on('translation', (msg, blob) => {
-    console.log('message: ' + msg);
+  socket.on('voice', (blob, obj) => {
+    // console.log('message: ' + msg.speech[0] +msg.speech[1]);
     
-    io.emit('translation', (msg, blob));
+    io.emit('voice', blob, obj);
   });
 });
 
@@ -55,6 +55,4 @@ io.on('connection', (socket) => {
 server.listen(3000, () => {
   console.log('server running at http://localhost:3000');
 });
-// app.listen(3000, () => {
-//   console.log('server running at http://localhost:3000');
-// });
+
