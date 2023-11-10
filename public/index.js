@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // call a translate function
     let tSpeech = await translateSpeech(speech, lang)
+    console.log('translated text: ', tSpeech)
 
     // emit translation event to server
     let blob = await recorder.getBlob();
@@ -112,8 +113,11 @@ function addText(leftText, rightText) {
 
 //SOCKET STUFF
 
+const synth = window.speechSynthesis;
 // catch voice event from server
 socket.on('voice', (arrayBuffer, textObj) => {
+
+  
   let blob = new Blob([arrayBuffer], { 'type' : 'audio/ogg; codecs=opus' });
   let audio = document.createElement('audio');
   audio.src = window.URL.createObjectURL(blob);
@@ -122,7 +126,45 @@ socket.on('voice', (arrayBuffer, textObj) => {
     //call speak words
     addText(textObj.speech[0], textObj.speech[1])
   
-    const synth = window.speechSynthesis;
+
+    // call a speak function
+    speakWords(textObj.speech[1], textObj.lang)
+
+    function speakWords(words, lang) {
+      // this function speaks the input words back to the user
+      // I set the name we want because the language wasn't working 
+      let name
+      // console.log(lang)
+      if (lang === 'es') {
+        name = 'Google español'
+      }
+      else {
+        name = 'Microsoft Mark - English (United States)'
+      }
+      let voice;
+      console.log('synth.getVoices() ', synth.getVoices())
+      for (let v of synth.getVoices()) {
+        if (v['name'].includes(name)) {
+          voice = v //set voice
+          break
+        }
+      }
+      
+      const utterThis = new SpeechSynthesisUtterance(words);
+      // defaults
+      utterThis.voice = voice
+      utterThis.pitch = 1
+      utterThis.rate = 1
+
+      synth.speak(utterThis)
+    }
+  })
+  let checkBox = document.querySelector('#checkbox')
+  if (checkBox.checked) {
+    audio.play();
+  } else {
+    addText(textObj.speech[0], textObj.speech[1])
+  
 
     // call a speak function
     speakWords(textObj.speech[1], textObj.lang)
@@ -154,6 +196,5 @@ socket.on('voice', (arrayBuffer, textObj) => {
 
       synth.speak(utterThis)
     }
-  })
-  audio.play();
+  }
 })
